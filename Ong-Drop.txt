@@ -1,0 +1,14 @@
+/* this file holds the commands to drop all the tables defined in the schema file. */
+DROP TABLE researcher CASCADE;
+DROP TABLE call CASCADE;
+DROP TABLE proposal CASCADE;
+DROP TABLE collaborator CASCADE;
+DROP TABLE conflict CASCADE;
+DROP TABLE review CASCADE;
+DROP TABLE coreviewer CASCADE;
+DROP TABLE meetings CASCADE;
+DROP TABLE discussedcalls CASCADE;
+DROP TABLE rsvps CASCADE;
+DROP TYPE callstatus;
+DROP TYPE appstatus;
+

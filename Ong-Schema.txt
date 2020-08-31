@@ -1,0 +1,93 @@
+/*
+This file has been extended from MurphyConorSchema.txt.
+All modifications are explained in the comments throughout this document.
+*/
+
+CREATE TABLE researcher(
+id SERIAL PRIMARY KEY,
+firstname VARCHAR(30) NOT NULL,
+lastname VARCHAR(30) NOT NULL,
+email VARCHAR(50) UNIQUE NOT NULL,
+organization VARCHAR(10)
+);
+
+CREATE TYPE callstatus AS ENUM('open','closed','paused','cancelled'); 
+
+CREATE TABLE call(
+id SERIAL PRIMARY KEY,
+title VARCHAR(50) NOT NULL,
+deadline DATE NOT NULL,
+description VARCHAR(250),
+area VARCHAR(30) NOT NULL,
+status callstatus DEFAULT 'open'
+);
+
+CREATE TYPE appstatus AS ENUM('submitted','awarded','denied');
+
+CREATE TABLE proposal(
+id SERIAL PRIMARY KEY,
+reqdamount NUMERIC(14, 2), --Line added by me: the amount requested by the proposers.
+callid INT REFERENCES call(id) NOT NULL,
+pi INT REFERENCES researcher(id) NOT NULL,
+status appstatus DEFAULT 'submitted' NOT NULL,
+amount NUMERIC(14,2),
+submitted DATE NOT NULL, --Line added by me: the date the proposal was submitted.
+awarded DATE --Line added by me: the date the proposal was awarded/denied.
+);
+
+CREATE TABLE collaborator(
+id SERIAL PRIMARY KEY,
+proposalid INT REFERENCES proposal(id) NOT NULL,
+researcherid INT REFERENCES researcher(id) NOT NULL,
+ispi BOOLEAN DEFAULT 'false' NOT NULL
+);
+
+CREATE TABLE conflict(
+id SERIAL PRIMARY KEY,
+researcher1 INT REFERENCES researcher(id) NOT NULL,
+researcher2 INT REFERENCES researcher(id) NOT NULL,
+reason VARCHAR(50),
+expiry DATE
+);
+
+CREATE TABLE review(
+id SERIAL PRIMARY KEY,
+reviewerid INT REFERENCES researcher(id) NOT NULL,
+proposalid INT REFERENCES proposal(id) NOT NULL,
+deadline DATE NOT NULL,
+submitted BOOLEAN DEFAULT 'false' NOT NULL
+);
+
+/* Co-Reviewers table added by me
+purpose of the table is to hold co reviewers of a proposal.
+assumes that "co-reviewers" don't have their own review to do,
+but instead helps another researcher review */
+
+CREATE TABLE coreviewer(
+id SERIAL PRIMARY KEY,
+reviewid INT REFERENCES review(id) NOT NULL,
+researcherid INT REFERENCES researcher(id) NOT NULL
+);
+
+/* meetings, discussedcalls, and rsvps tables added by me
+meetings table is used to keep track of meetings - room/date.
+discussed calls table used to keep track of all calls being discussed at these meetings.
+rsvps table keeps track of researchers attending these meetings.
+assumes that each meeting can discuss 0-inf calls, instead of exactly 3. */
+
+CREATE TABLE meetings(
+id SERIAL PRIMARY KEY,
+roomid INT NOT NULL,
+date DATE NOT NULL
+);
+
+CREATE TABLE discussedcalls(
+meetingid INT REFERENCES meetings(id) NOT NULL,
+callid INT REFERENCES call(id) NOT NULL
+);
+
+CREATE TABLE rsvps(
+meetingid INT REFERENCES meetings(id) NOT NULL,
+researcherid INT REFERENCES researcher(id) NOT NULL
+);
+
